@@ -54,7 +54,7 @@ cd .. && \
 tar -xzf /tmp/cavm-executive_4899453-g82e0782.tgz -C /opt && \
 
 # Cleanup
-rm -rf /usr/src/* /tmp/* && \
+rm -rf /usr/src/* /tmp/* /var/lib/apt/lists/* && \
 apt-get -y remove dpkg-dev && \
 apt-get -y autoremove
 
