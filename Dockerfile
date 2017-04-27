@@ -61,4 +61,13 @@ apt-get -y autoremove
 # Make sure /entrypoint.sh is executable
 RUN chmod +x /entrypoint.sh
 
+# Add unprivileged user
+RUN useradd -m -U -s /bin/sh -u 1234 user
+
+# Install su-exec
+RUN \
+curl -L -o /tmp/su-exec.c "https://raw.githubusercontent.com/ncopa/su-exec/master/su-exec.c" && \
+gcc /tmp/su-exec.c -o /sbin/su-exec && \
+rm /tmp/su-exec.c
+
 ENTRYPOINT ["/entrypoint.sh"]
