@@ -1,73 +1,23 @@
-FROM debian:wheezy-slim
+FROM lochnair/buildenv-base:alpine
 
-LABEL Description="Build environment for the Octeon-based EdgeRouter models"
+LABEL Description="Build environment for Octeon-based devices"
 LABEL Maintainer="Nils Andreas Svee <me@lochnair.net>"
+
+ARG BINUTILS_VER=2.23.2
+ARG GCC_VER=7.2.0
+ARG GMP_VER=6.1.2
+ARG ISL_VER=0.18
+ARG MPC_VER=1.0.3
+ARG MPFR_VER=3.1.5
+
+ENV PATH="/opt/cross/bin:${PATH}"
 
 COPY root/ /
 
-ENV PATH "/opt/cross/bin:$PATH"
-ENV TARGET "mips64-octeon-linux-gnu"
-
+RUN /build_toolchain.sh
 RUN \
-apt-get update && \
-apt-get install -y bison \
-		   build-essential \
-		   curl \
-		   dpkg-dev \
-		   file \
-		   flex \
-		   g++ \
-		   gawk \
-		   libmpfr-dev \
-		   make && \
-cd /usr/src && \
-apt-get source binutils \
-	       gcc-4.7-source \
-	       libgmp10 \
-	       libmpc2 \
-	       libmpfr4 && \
-tar -xf gcc-4.7-4.7.2/gcc-4.7.2-dfsg.tar.xz && \
+tar -xf /tmp/cavm-executive_4899453-g82e0782.tgz -C /opt && \
+rm /tmp/*
 
-# Compile and install binutils
-cd binutils-2.22 && \
-curl -s -L "http://sourceware-org.1504.n7.nabble.com/attachment/118218/0/addsaa.diff.txt" | patch -p0 && \
-mkdir ../binutils-build && cd ../binutils-build && \
-../binutils-2.22/configure --prefix=/opt/cross --target=$TARGET --disable-multilib --disable-werror && \
-make -j$(nproc) && \
-make install && \
-cd .. && \
-
-# First stage GCC
-cd gcc-4.7.2 && \
-ln -s ../gmp-5.0.5+dfsg gmp && \
-ln -s ../mpclib-0.9 mpc && \
-ln -s ../mpfr4-3.1.0 mpfr && \
-cd .. && \
-mkdir gcc-build && cd gcc-build && \
-../gcc-4.7.2/configure --prefix=/opt/cross --target=$TARGET --enable-languages=c --disable-multilib && \
-make -j$(nproc) all-gcc && \
-curl -s -L "http://dev.debwrt.net/export/935/trunk/arch/octeon/erlite/patches/gcc-install.patch" | patch -p0 && \
-make install-gcc && \
-cd .. && \
-
-# Extract Cavium Executive headers
-tar -xzf /tmp/cavm-executive_4899453-g82e0782.tgz -C /opt && \
-
-# Cleanup
-rm -rf /usr/src/* /tmp/* /var/lib/apt/lists/* && \
-apt-get -y remove dpkg-dev && \
-apt-get -y autoremove
-
-# Make sure /entrypoint.sh is executable
-RUN chmod +x /entrypoint.sh
-
-# Add unprivileged user
-RUN useradd -m -U -s /bin/sh -u 1234 user
-
-# Install su-exec
-RUN \
-curl -L -o /tmp/su-exec.c "https://raw.githubusercontent.com/ncopa/su-exec/master/su-exec.c" && \
-gcc /tmp/su-exec.c -o /sbin/su-exec && \
-rm /tmp/su-exec.c
 
 ENTRYPOINT ["/entrypoint.sh"]
