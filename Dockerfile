@@ -19,5 +19,6 @@ RUN \
 tar -xf /tmp/cavm-executive_4899453-g82e0782.tgz -C /opt && \
 rm /tmp/*
 
+RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
