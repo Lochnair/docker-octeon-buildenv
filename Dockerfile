@@ -1,5 +1,4 @@
-FROM lochnair/buildenv-base:alpine
-
+FROM lochnair/buildenv-base:debian
 LABEL Description="Build environment for Octeon-based devices"
 LABEL Maintainer="Nils Andreas Svee <me@lochnair.net>"
 
@@ -16,6 +15,9 @@ COPY root/ /
 
 RUN /build_toolchain.sh
 RUN \
+wget https://raw.githubusercontent.com/ncopa/su-exec/master/su-exec.c && \
+gcc -o /usr/bin/su-exec su-exec.c && \
+rm su-exec.v && \
 tar -xf /tmp/cavm-executive_4899453-g82e0782.tgz -C /opt && \
 rm /tmp/*
 
