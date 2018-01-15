@@ -17,7 +17,7 @@ RUN /build_toolchain.sh
 RUN \
 wget https://raw.githubusercontent.com/ncopa/su-exec/master/su-exec.c && \
 gcc -o /usr/bin/su-exec su-exec.c && \
-rm su-exec.v && \
+rm su-exec.c && \
 tar -xf /tmp/cavm-executive_4899453-g82e0782.tgz -C /opt && \
 rm /tmp/*
 
